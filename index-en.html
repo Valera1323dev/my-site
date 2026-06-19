@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Research — Fundamental AI Research Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #fafbfc;
+      color: #1a1a2e;
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: #1a1a2e; color: #fff; }
+
+    .bg {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, #fafbfc 0%, #f0f1f5 100%);
+      z-index: 0;
+    }
+    .bg-orb {
+      position: fixed; top: -20%; right: -10%;
+      width: 700px; height: 700px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,26,46,0.02) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+    .bg-orb-2 {
+      position: fixed; bottom: -20%; left: -10%;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(100,100,140,0.02) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    #web-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0; pointer-events: none;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 22px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      background: rgba(250,251,252,0.6);
+    }
+    nav .logo {
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: #1a1a2e;
+    }
+    nav .logo span { color: rgba(26,26,46,0.25); font-weight: 300; }
+
+    .lang-switch {
+      display: flex; gap: 4px;
+      background: rgba(26,26,46,0.04);
+      border-radius: 100px; padding: 3px;
+    }
+    .lang-switch a {
+      padding: 5px 12px; border-radius: 100px;
+      font-size: 0.65rem; font-weight: 600; text-decoration: none;
+      text-transform: uppercase; letter-spacing: 1px;
+      transition: all .2s;
+      color: rgba(26,26,46,0.25);
+    }
+    .lang-switch a.active {
+      background: #1a1a2e; color: #fff;
+    }
+    .lang-switch a:not(.active):hover { color: #1a1a2e; }
+
+    nav .nav-links { display: flex; gap: 36px; align-items: center; }
+    nav .nav-links a {
+      color: rgba(26,26,46,0.35); text-decoration: none;
+      font-size: 0.8rem; font-weight: 500; letter-spacing: 1px;
+      text-transform: uppercase; transition: color .3s;
+    }
+    nav .nav-links a:hover { color: #1a1a2e; }
+
+    section { position: relative; z-index: 1; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 160px 24px 80px;
+    }
+    .hero-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem; font-weight: 500;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(26,26,46,0.2);
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -1px;
+      margin-bottom: 24px; color: #1a1a2e;
+    }
+    .hero h1 .soft { font-weight: 300; color: rgba(26,26,46,0.3); }
+    .hero p {
+      font-size: 1rem; color: rgba(26,26,46,0.35);
+      max-width: 500px; margin: 0 auto 44px;
+      line-height: 1.8; font-weight: 400;
+    }
+    .hero-buttons { display: flex; gap: 12px; justify-content: center; }
+    .btn-p, .btn-s {
+      padding: 14px 32px; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 600; text-decoration: none;
+      transition: all .3s; letter-spacing: 0.5px;
+    }
+    .btn-p { background: #1a1a2e; color: #fff; }
+    .btn-p:hover { background: #2a2a4e; transform: translateY(-1px); }
+    .btn-s {
+      background: transparent; color: #1a1a2e;
+      border: 1px solid rgba(26,26,46,0.08);
+    }
+    .btn-s:hover { background: rgba(26,26,46,0.03); }
+
+    .divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(26,26,46,0.04), transparent);
+    }
+
+    .sec-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem; font-weight: 500;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(26,26,46,0.2);
+      margin-bottom: 12px;
+    }
+    .sec-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 600; letter-spacing: -0.5px;
+      margin-bottom: 14px; color: #1a1a2e;
+    }
+    .sec-desc {
+      color: rgba(26,26,46,0.3);
+      font-size: 0.9rem; max-width: 480px;
+      margin-bottom: 48px; line-height: 1.7;
+    }
+
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 2px; background: rgba(26,26,46,0.03);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 16px; overflow: hidden;
+    }
+    .card {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+      padding: 40px 32px;
+      transition: all .3s;
+    }
+    .card:hover { background: rgba(255,255,255,0.8); }
+    .card .num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem; color: rgba(26,26,46,0.15);
+      margin-bottom: 16px; font-weight: 500;
+    }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.3px; }
+    .card p { font-size: 0.82rem; color: rgba(26,26,46,0.3); line-height: 1.7; }
+
+    .cards-grid-2 {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .card-2 {
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 16px; padding: 36px 32px;
+      transition: all .3s;
+    }
+    .card-2:hover {
+      background: rgba(255,255,255,0.7);
+      border-color: rgba(26,26,46,0.06);
+    }
+    .card-2 .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem; letter-spacing: 2px;
+      color: rgba(26,26,46,0.15); margin-bottom: 10px;
+    }
+    .card-2 h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+    .card-2 p { font-size: 0.82rem; color: rgba(26,26,46,0.3); line-height: 1.7; }
+
+    .quote-block { padding: 80px 0; text-align: center; }
+    .quote-block blockquote {
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      font-weight: 400; line-height: 1.6;
+      max-width: 640px; margin: 0 auto;
+      color: rgba(26,26,46,0.45); font-style: italic;
+    }
+    .quote-block blockquote cite {
+      display: block; margin-top: 20px;
+      font-size: 0.75rem; font-weight: 500; font-style: normal;
+      color: rgba(26,26,46,0.15); letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    .approach-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 48px; align-items: center;
+    }
+    .approach-left h2 { margin-bottom: 20px; }
+    .approach-left p {
+      color: rgba(26,26,46,0.3);
+      font-size: 0.9rem; line-height: 1.8; margin-bottom: 16px;
+    }
+    .approach-right {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .approach-right .item {
+      background: rgba(255,255,255,0.3);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 12px; padding: 24px 20px; text-align: center;
+    }
+    .approach-right .item .nm { font-size: 1.3rem; font-weight: 600; color: #1a1a2e; }
+    .approach-right .item .lb {
+      font-size: 0.65rem; color: rgba(26,26,46,0.2);
+      margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .group-section { padding: 80px 0; }
+    .group-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .group-card {
+      background: rgba(255,255,255,0.3);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 12px; padding: 28px 20px; text-align: center;
+      transition: all .3s;
+    }
+    .group-card:hover {
+      background: rgba(255,255,255,0.6);
+      border-color: rgba(26,26,46,0.06);
+    }
+    .group-card .initials {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: #1a1a2e; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 1px;
+    }
+    .group-card .role {
+      font-size: 0.6rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: rgba(26,26,46,0.15); margin-bottom: 6px;
+    }
+    .group-card h4 { font-size: 0.85rem; font-weight: 600; }
+    .group-card .area { font-size: 0.72rem; color: rgba(26,26,46,0.25); margin-top: 4px; }
+
+    .cta-block { padding: 100px 0; text-align: center; }
+    .cta-box {
+      border: 1px solid rgba(26,26,46,0.04);
+      border-radius: 20px; padding: 72px 40px;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(8px);
+    }
+    .cta-box h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 600; margin-bottom: 12px; }
+    .cta-box p { color: rgba(26,26,46,0.25); max-width: 400px; margin: 0 auto 28px; font-size: 0.9rem; }
+
+    footer {
+      position: relative; z-index: 1;
+      padding: 32px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1100px; margin: 0 auto;
+      color: rgba(26,26,46,0.15); font-size: 0.75rem;
+    }
+    footer a { color: rgba(26,26,46,0.2); text-decoration: none; transition: color .3s; }
+    footer a:hover { color: #1a1a2e; }
+
+    .rv {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+    }
+    .rv.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1024px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .approach-grid { grid-template-columns: 1fr; gap: 32px; }
+      .group-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      nav { padding: 18px 20px; }
+      nav .nav-links a:not(.lang-switch) { display: none; }
+      .container { padding: 0 20px; }
+      .hero { padding: 140px 20px 60px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .cards-grid-2 { grid-template-columns: 1fr; }
+      .approach-right { grid-template-columns: 1fr; }
+      .group-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb-2"></div>
+  <canvas id="web-canvas" data-color="26,26,46"></canvas>
+
+  <nav>
+    <div class="logo">Nexus<span> Research</span></div>
+    <div class="nav-links">
+      <a href="#approach">approach</a>
+      <a href="#research">research</a>
+      <a href="#group">group</a>
+      <a href="contact-en.html">contact</a>
+      <div class="lang-switch">
+        <a href="index.html">ru</a>
+        <a href="index-en.html" class="active">en</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <div class="hero-label">independent research laboratory</div>
+      <h1>
+        Exploring the<br>
+        <span class="soft">frontiers of</span> intelligence
+      </h1>
+      <p>
+        We are a distributed group of researchers exploring fundamental 
+        questions in artificial intelligence — beyond benchmarks, 
+        beyond architectures, beyond what is currently considered possible.
+      </p>
+      <div class="hero-buttons">
+        <a href="#research" class="btn-p">Our research</a>
+        <a href="#group" class="btn-s">The group</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section id="approach" style="padding: 80px 0;">
+    <div class="container">
+      <div class="rv">
+        <div class="sec-tag">// Philosophy</div>
+        <h2 class="sec-title">Understanding before prediction</h2>
+        <p class="sec-desc">We believe the next leap in AI will come not from scale, but from a deeper structural understanding of how meaning emerges in artificial systems.</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card rv">
+          <div class="num">01</div>
+          <h3>Latent Semiosis</h3>
+          <p>Our work explores how meaning can emerge within latent spaces through recursive self-organisation — without explicit supervision or predefined ontologies.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">02</div>
+          <h3>Dynamic Continuity</h3>
+          <p>We study models that maintain coherent internal states across long temporal horizons, allowing for persistent reasoning and contextual accumulation.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">03</div>
+          <h3>Emergent Alignment</h3>
+          <p>Rather than hard-coded constraints, we investigate how alignment can arise naturally from structural priors inherent in the learning process itself.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">04</div>
+          <h3>Recursive Abstraction</h3>
+          <p>Layered self-reflection loops that enable models to reason about their own reasoning — forming meta-cognitive layers without explicit engineering.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">05</div>
+          <h3>Topological Learning</h3>
+          <p>We leverage geometric and topological methods to uncover the shape of knowledge within high-dimensional representational spaces.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">06</div>
+          <h3>Generative Sparseity</h3>
+          <p>Exploring how extreme sparsity in activation pathways can lead to more robust, interpretable, and efficient generative models.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section id="research" style="padding: 80px 0;">
+    <div class="container">
+      <div class="rv" style="margin-bottom:48px;">
+        <div class="sec-tag">// Active research</div>
+        <h2 class="sec-title">Current directions</h2>
+        <p class="sec-desc">Our work spans multiple frontiers — each exploring a different facet of what intelligence could become.</p>
+      </div>
+      <div class="cards-grid-2">
+        <div class="card-2 rv">
+          <div class="tag">→ Project Aether</div>
+          <h3>Autonomous reasoning substrates</h3>
+          <p>Developing self-organising neural substrates capable of open-ended reasoning without fixed computational graphs or predefined recurrent structures.</p>
+        </div>
+        <div class="card-2 rv">
+          <div class="tag">→ Project Cipher</div>
+          <h3>Interpretable latent dynamics</h3>
+          <p>Mapping the internal dynamics of deep models onto human-interpretable symbolic manifolds — bridging the gap between connectionist and symbolic AI.</p>
+        </div>
+        <div class="card-2 rv">
+          <div class="tag">→ Project Monad</div>
+          <h3>Unified representational frameworks</h3>
+          <p>Towards a unified theoretical framework that describes perception, reasoning, and action within a single continuous representational space.</p>
+        </div>
+        <div class="card-2 rv">
+          <div class="tag">→ Project Echo</div>
+          <h3>Long-term memory consolidation</h3>
+          <p>Investigating how artificial systems can consolidate sparse experiences into durable structural knowledge — analogous to hippocampal replay.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section style="padding: 80px 0;">
+    <div class="container">
+      <div class="approach-grid">
+        <div class="approach-left rv">
+          <div class="sec-tag">// Our approach</div>
+          <h2 class="sec-title">First principles,<br>not first movers</h2>
+          <p>We do not optimise for publication counts or benchmark leaderboards. Our research starts from first principles: what is understanding, how does it arise, and how can it be instantiated in silico?</p>
+          <p>Every line of inquiry is evaluated not by its short-term applicability, but by the depth of the questions it opens up. We believe the most valuable discoveries often emerge from the least constrained explorations.</p>
+        </div>
+        <div class="approach-right">
+          <div class="item rv"><div class="nm">12+</div><div class="lb">Active projects</div></div>
+          <div class="item rv"><div class="nm">7</div><div class="lb">Research clusters</div></div>
+          <div class="item rv"><div class="nm">40+</div><div class="lb">Contributors</div></div>
+          <div class="item rv"><div class="nm">3</div><div class="lb">Continents</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section id="group" class="group-section">
+    <div class="container">
+      <div class="rv">
+        <div class="sec-tag">// Research group</div>
+        <h2 class="sec-title">A distributed collective</h2>
+        <p class="sec-desc">We are researchers, engineers, and theorists from different backgrounds, united by a shared curiosity about the nature of intelligence.</p>
+      </div>
+      <div class="group-grid" style="grid-template-columns: 1fr 1fr 1fr; max-width: 700px; margin: 0 auto;">
+        <div class="group-card rv">
+          <div class="initials">VP</div>
+          <div class="role">Founder, lead researcher</div>
+          <h4>Vladislav Popov</h4>
+          <div class="area">Deep learning architectures, representation theory</div>
+        </div>
+        <div class="group-card rv">
+          <div class="initials">VK</div>
+          <div class="role">Founder, technical director</div>
+          <h4>Valeriy Kolesov</h4>
+          <div class="area">AI infrastructure, sparse computing</div>
+        </div>
+        <div class="group-card rv">
+          <div class="initials">DS</div>
+          <div class="role">Head of generative architectures</div>
+          <h4>Dina Seco</h4>
+          <div class="area">Deep generative models, latent semiosis</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <div class="quote-block">
+    <div class="container rv">
+      <blockquote>
+        « The most exciting phrase to hear in science, the one that heralds new discoveries, is not 'Eureka!' but 'That's funny...' »
+        <cite>— a sentiment we carry into every experiment</cite>
+      </blockquote>
+    </div>
+  </div>
+
+  <section id="cta5" class="cta-block">
+    <div class="container">
+      <div class="cta-box rv">
+        <h2>Interested in our work?</h2>
+        <p>We are always looking for collaborators, partners, and thoughtful discussions. Reach out — we would love to hear from you.</p>
+        <a href="contact-en.html" class="btn-p">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 Nexus Research — a collective for fundamental AI research</span>
+    <span><a href="contact-en.html">agiresearchcorp@gmail.com</a></span>
+  </footer>
+
+  <script src="web-animation.js"></script>
+  <script>
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.rv').forEach(function(el) { obs.observe(el); });
+
+    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        var t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

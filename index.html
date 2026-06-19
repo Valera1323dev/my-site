@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Research — Лаборатория фундаментальных исследований ИИ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #fafbfc;
+      color: #1a1a2e;
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: #1a1a2e; color: #fff; }
+
+    .bg {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, #fafbfc 0%, #f0f1f5 100%);
+      z-index: 0;
+    }
+    .bg-orb {
+      position: fixed; top: -20%; right: -10%;
+      width: 700px; height: 700px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,26,46,0.02) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+    .bg-orb-2 {
+      position: fixed; bottom: -20%; left: -10%;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(100,100,140,0.02) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    #web-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0; pointer-events: none;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 22px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      background: rgba(250,251,252,0.6);
+    }
+    nav .logo {
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: #1a1a2e;
+    }
+    nav .logo span { color: rgba(26,26,46,0.25); font-weight: 300; }
+
+    .lang-switch {
+      display: flex; gap: 4px;
+      background: rgba(26,26,46,0.04);
+      border-radius: 100px; padding: 3px;
+    }
+    .lang-switch a {
+      padding: 5px 12px; border-radius: 100px;
+      font-size: 0.65rem; font-weight: 600; text-decoration: none;
+      text-transform: uppercase; letter-spacing: 1px;
+      transition: all .2s;
+      color: rgba(26,26,46,0.25);
+    }
+    .lang-switch a.active {
+      background: #1a1a2e; color: #fff;
+    }
+    .lang-switch a:not(.active):hover { color: #1a1a2e; }
+
+    nav .nav-links { display: flex; gap: 36px; align-items: center; }
+    nav .nav-links a {
+      color: rgba(26,26,46,0.35); text-decoration: none;
+      font-size: 0.8rem; font-weight: 500; letter-spacing: 1px;
+      text-transform: uppercase; transition: color .3s;
+    }
+    nav .nav-links a:hover { color: #1a1a2e; }
+
+    section { position: relative; z-index: 1; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 160px 24px 80px;
+    }
+    .hero-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem; font-weight: 500;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(26,26,46,0.2);
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -1px;
+      margin-bottom: 24px; color: #1a1a2e;
+    }
+    .hero h1 .soft { font-weight: 300; color: rgba(26,26,46,0.3); }
+    .hero p {
+      font-size: 1rem; color: rgba(26,26,46,0.35);
+      max-width: 500px; margin: 0 auto 44px;
+      line-height: 1.8; font-weight: 400;
+    }
+    .hero-buttons { display: flex; gap: 12px; justify-content: center; }
+    .btn-p, .btn-s {
+      padding: 14px 32px; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 600; text-decoration: none;
+      transition: all .3s; letter-spacing: 0.5px;
+    }
+    .btn-p { background: #1a1a2e; color: #fff; }
+    .btn-p:hover { background: #2a2a4e; transform: translateY(-1px); }
+    .btn-s {
+      background: transparent; color: #1a1a2e;
+      border: 1px solid rgba(26,26,46,0.08);
+    }
+    .btn-s:hover { background: rgba(26,26,46,0.03); }
+
+    .divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(26,26,46,0.04), transparent);
+    }
+
+    .sec-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem; font-weight: 500;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(26,26,46,0.2);
+      margin-bottom: 12px;
+    }
+    .sec-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 600; letter-spacing: -0.5px;
+      margin-bottom: 14px; color: #1a1a2e;
+    }
+    .sec-desc {
+      color: rgba(26,26,46,0.3);
+      font-size: 0.9rem; max-width: 480px;
+      margin-bottom: 48px; line-height: 1.7;
+    }
+
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 2px; background: rgba(26,26,46,0.03);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 16px; overflow: hidden;
+    }
+    .card {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+      padding: 40px 32px;
+      transition: all .3s;
+    }
+    .card:hover { background: rgba(255,255,255,0.8); }
+    .card .num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem; color: rgba(26,26,46,0.15);
+      margin-bottom: 16px; font-weight: 500;
+    }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.3px; }
+    .card p { font-size: 0.82rem; color: rgba(26,26,46,0.3); line-height: 1.7; }
+
+    .cards-grid-2 {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .card-2 {
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 16px; padding: 36px 32px;
+      transition: all .3s;
+    }
+    .card-2:hover {
+      background: rgba(255,255,255,0.7);
+      border-color: rgba(26,26,46,0.06);
+    }
+    .card-2 .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem; letter-spacing: 2px;
+      color: rgba(26,26,46,0.15); margin-bottom: 10px;
+    }
+    .card-2 h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+    .card-2 p { font-size: 0.82rem; color: rgba(26,26,46,0.3); line-height: 1.7; }
+
+    .quote-block { padding: 80px 0; text-align: center; }
+    .quote-block blockquote {
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      font-weight: 400; line-height: 1.6;
+      max-width: 640px; margin: 0 auto;
+      color: rgba(26,26,46,0.45); font-style: italic;
+    }
+    .quote-block blockquote cite {
+      display: block; margin-top: 20px;
+      font-size: 0.75rem; font-weight: 500; font-style: normal;
+      color: rgba(26,26,46,0.15); letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    .approach-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 48px; align-items: center;
+    }
+    .approach-left h2 { margin-bottom: 20px; }
+    .approach-left p {
+      color: rgba(26,26,46,0.3);
+      font-size: 0.9rem; line-height: 1.8; margin-bottom: 16px;
+    }
+    .approach-right {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .approach-right .item {
+      background: rgba(255,255,255,0.3);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 12px; padding: 24px 20px; text-align: center;
+    }
+    .approach-right .item .nm { font-size: 1.3rem; font-weight: 600; color: #1a1a2e; }
+    .approach-right .item .lb {
+      font-size: 0.65rem; color: rgba(26,26,46,0.2);
+      margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .group-section { padding: 80px 0; }
+    .group-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .group-card {
+      background: rgba(255,255,255,0.3);
+      border: 1px solid rgba(26,26,46,0.03);
+      border-radius: 12px; padding: 28px 20px; text-align: center;
+      transition: all .3s;
+    }
+    .group-card:hover {
+      background: rgba(255,255,255,0.6);
+      border-color: rgba(26,26,46,0.06);
+    }
+    .group-card .initials {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: #1a1a2e; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 1px;
+    }
+    .group-card .role {
+      font-size: 0.6rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: rgba(26,26,46,0.15); margin-bottom: 6px;
+    }
+    .group-card h4 { font-size: 0.85rem; font-weight: 600; }
+    .group-card .area { font-size: 0.72rem; color: rgba(26,26,46,0.25); margin-top: 4px; }
+
+    .cta-block { padding: 100px 0; text-align: center; }
+    .cta-box {
+      border: 1px solid rgba(26,26,46,0.04);
+      border-radius: 20px; padding: 72px 40px;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(8px);
+    }
+    .cta-box h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 600; margin-bottom: 12px; }
+    .cta-box p { color: rgba(26,26,46,0.25); max-width: 400px; margin: 0 auto 28px; font-size: 0.9rem; }
+
+    footer {
+      position: relative; z-index: 1;
+      padding: 32px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1100px; margin: 0 auto;
+      color: rgba(26,26,46,0.15); font-size: 0.75rem;
+    }
+    footer a { color: rgba(26,26,46,0.2); text-decoration: none; transition: color .3s; }
+    footer a:hover { color: #1a1a2e; }
+
+    .rv {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+    }
+    .rv.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1024px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .approach-grid { grid-template-columns: 1fr; gap: 32px; }
+      .group-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      nav { padding: 18px 20px; }
+      nav .nav-links a:not(.lang-switch) { display: none; }
+      .container { padding: 0 20px; }
+      .hero { padding: 140px 20px 60px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .cards-grid-2 { grid-template-columns: 1fr; }
+      .approach-right { grid-template-columns: 1fr; }
+      .group-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 6px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb-2"></div>
+  <canvas id="web-canvas" data-color="26,26,46"></canvas>
+
+  <nav>
+    <div class="logo">Nexus<span> Research</span></div>
+    <div class="nav-links">
+      <a href="#approach">подход</a>
+      <a href="#research">исследования</a>
+      <a href="#group">группа</a>
+      <a href="contact.html">контакты</a>
+      <div class="lang-switch">
+        <a href="index.html" class="active">ru</a>
+        <a href="index-en.html">en</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <div class="hero-label">независимая исследовательская лаборатория</div>
+      <h1>
+        На границах<br>
+        <span class="soft">искусственного</span> интеллекта
+      </h1>
+      <p>
+        Мы — распределённая группа исследователей, изучающих фундаментальные 
+        вопросы искусственного интеллекта. Вне бенчмарков, вне архитектур, 
+        вне того, что сегодня считается возможным.
+      </p>
+      <div class="hero-buttons">
+        <a href="#research" class="btn-p">Наши исследования</a>
+        <a href="#group" class="btn-s">Группа</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section id="approach" style="padding: 80px 0;">
+    <div class="container">
+      <div class="rv">
+        <div class="sec-tag">// Философия</div>
+        <h2 class="sec-title">Понимание прежде предсказания</h2>
+        <p class="sec-desc">Мы считаем, что следующий скачок в ИИ произойдёт не за счёт масштаба, а за счёт глубинного структурного понимания того, как смысл возникает в искусственных системах.</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card rv">
+          <div class="num">01</div>
+          <h3>Латентный семиозис</h3>
+          <p>Исследуем, как смысл может возникать в латентных пространствах через рекурсивную самоорганизацию — без явного supervision и предопределённых онтологий.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">02</div>
+          <h3>Динамическая непрерывность</h3>
+          <p>Изучаем модели, сохраняющие когерентные внутренние состояния на длинных временных горизонтах — для устойчивого рассуждения и накопления контекста.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">03</div>
+          <h3>Эмерджентная согласованность</h3>
+          <p>Вместо жёстких ограничений — исследуем, как согласованность может возникать естественным образом из структурных предпосылок самого обучения.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">04</div>
+          <h3>Рекурсивная абстракция</h3>
+          <p>Многослойные петли саморефлексии, позволяющие модели рассуждать о собственном рассуждении — без явного инжиниринга мета-уровней.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">05</div>
+          <h3>Топологическое обучение</h3>
+          <p>Применяем геометрические и топологические методы, чтобы вскрывать форму знания в многомерных репрезентационных пространствах.</p>
+        </div>
+        <div class="card rv">
+          <div class="num">06</div>
+          <h3>Генеративная разреженность</h3>
+          <p>Исследуем, как экстремальная разреженность активационных путей может вести к более устойчивым, интерпретируемым и эффективным генеративным моделям.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section id="research" style="padding: 80px 0;">
+    <div class="container">
+      <div class="rv" style="margin-bottom:48px;">
+        <div class="sec-tag">// Актуальные исследования</div>
+        <h2 class="sec-title">Текущие направления</h2>
+        <p class="sec-desc">Наша работа охватывает несколько фронтиров — каждый исследует различные грани того, чем может стать интеллект.</p>
+      </div>
+      <div class="cards-grid-2">
+        <div class="card-2 rv">
+          <div class="tag">→ Проект «Эфир»</div>
+          <h3>Автономные субстраты рассуждения</h3>
+          <p>Разработка самоорганизующихся нейронных субстратов, способных к открытому рассуждению без фиксированных вычислительных графов.</p>
+        </div>
+        <div class="card-2 rv">
+          <div class="tag">→ Проект «Шифр»</div>
+          <h3>Интерпретируемая латентная динамика</h3>
+          <p>Картографирование внутренней динамики глубоких моделей на человеко-интерпретируемые семантические многообразия — мост между коннекционизмом и символьным ИИ.</p>
+        </div>
+        <div class="card-2 rv">
+          <div class="tag">→ Проект «Монада»</div>
+          <h3>Унифицированные репрезентационные框架</h3>
+          <p>К единой теоретической рамке, описывающей восприятие, рассуждение и действие в едином непрерывном репрезентационном пространстве.</p>
+        </div>
+        <div class="card-2 rv">
+          <div class="tag">→ Проект «Эхо»</div>
+          <h3>Долговременная консолидация памяти</h3>
+          <p>Изучение того, как искусственные системы могут консолидировать разреженный опыт в прочное структурное знание.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section style="padding: 80px 0;">
+    <div class="container">
+      <div class="approach-grid">
+        <div class="approach-left rv">
+          <div class="sec-tag">// Наш подход</div>
+          <h2 class="sec-title">Первые принципы,<br>а не гонка за рынком</h2>
+          <p>Мы не оптимизируем под количество публикаций или лидерборды. Наши исследования исходят из первых принципов: что такое понимание, как оно возникает, и как его можно воплотить в кремнии?</p>
+          <p>Каждое направление оценивается не по краткосрочной применимости, а по глубине вопросов, которые оно открывает.</p>
+        </div>
+        <div class="approach-right">
+          <div class="item rv"><div class="nm">12+</div><div class="lb">Активных проектов</div></div>
+          <div class="item rv"><div class="nm">7</div><div class="lb">Кластеров</div></div>
+          <div class="item rv"><div class="nm">40+</div><div class="lb">Исследователей</div></div>
+          <div class="item rv"><div class="nm">3</div><div class="lb">Континента</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <section id="group" class="group-section">
+    <div class="container">
+      <div class="rv">
+        <div class="sec-tag">// Исследовательская группа</div>
+        <h2 class="sec-title">Распределённый коллектив</h2>
+        <p class="sec-desc">Мы — исследователи, инженеры и теоретики из разных областей, объединённые общим любопытством к природе интеллекта.</p>
+      </div>
+      <div class="group-grid" style="grid-template-columns: 1fr 1fr 1fr; max-width: 700px; margin: 0 auto;">
+        <div class="group-card rv">
+          <div class="initials">ВП</div>
+          <div class="role">Основатель, ведущий исследователь</div>
+          <h4>Попов Владислав</h4>
+          <div class="area">Архитектуры глубокого обучения, теория представлений</div>
+        </div>
+        <div class="group-card rv">
+          <div class="initials">ВК</div>
+          <div class="role">Основатель, технический директор</div>
+          <h4>Колесов Валерий</h4>
+          <div class="area">Инфраструктура ИИ, разреженные вычисления</div>
+        </div>
+        <div class="group-card rv">
+          <div class="initials">ДС</div>
+          <div class="role">Главный по генеративным архитектурам</div>
+          <h4>Дина Секо</h4>
+          <div class="area">Глубокие генеративные модели, латентный семиозис</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider container"></div>
+
+  <div class="quote-block">
+    <div class="container rv">
+      <blockquote>
+        « Самая захватывающая фраза в науке, предвещающая новые открытия — не «Эврика!», а «Забавно…» »
+        <cite>— мы берём этот принцип в каждый эксперимент</cite>
+      </blockquote>
+    </div>
+  </div>
+
+  <section id="cta4" class="cta-block">
+    <div class="container">
+      <div class="cta-box rv">
+        <h2>Интересуетесь нашей работой?</h2>
+        <p>Мы всегда открыты к коллаборации, партнёрству и содержательным дискуссиям. Напишите нам.</p>
+        <a href="contact.html" class="btn-p">Связаться</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 Nexus Research — коллектив фундаментальных исследований ИИ</span>
+    <span><a href="contact.html">agiresearchcorp@gmail.com</a></span>
+  </footer>
+
+  <script src="web-animation.js"></script>
+  <script>
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.rv').forEach(function(el) { obs.observe(el); });
+
+    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        var t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

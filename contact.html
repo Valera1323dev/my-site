@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Связаться — Nexus Research</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #fafbfc;
+      color: #1a1a2e;
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    ::selection { background: #1a1a2e; color: #fff; }
+
+    .bg {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, #fafbfc 0%, #f0f1f5 100%);
+      z-index: 0;
+    }
+
+    #web-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0; pointer-events: none;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 22px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      backdrop-filter: blur(24px);
+      background: rgba(250,251,252,0.6);
+    }
+    nav .logo {
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: #1a1a2e;
+    }
+    nav .logo span { color: rgba(26,26,46,0.25); font-weight: 300; }
+
+    .lang-switch {
+      display: flex; gap: 4px;
+      background: rgba(26,26,46,0.04);
+      border-radius: 100px; padding: 3px;
+    }
+    .lang-switch a {
+      padding: 5px 12px; border-radius: 100px;
+      font-size: 0.65rem; font-weight: 600; text-decoration: none;
+      text-transform: uppercase; letter-spacing: 1px;
+      transition: all .2s;
+      color: rgba(26,26,46,0.25);
+    }
+    .lang-switch a.active { background: #1a1a2e; color: #fff; }
+    .lang-switch a:not(.active):hover { color: #1a1a2e; }
+
+    nav .nav-links { display: flex; gap: 36px; align-items: center; }
+    nav .nav-links a {
+      color: rgba(26,26,46,0.35); text-decoration: none;
+      font-size: 0.8rem; font-weight: 500; letter-spacing: 1px;
+      text-transform: uppercase; transition: color .3s;
+    }
+    nav .nav-links a:hover { color: #1a1a2e; }
+
+    main {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 140px 24px 80px;
+      position: relative; z-index: 1;
+    }
+    .contact-card {
+      max-width: 520px; width: 100%;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(26,26,46,0.04);
+      border-radius: 24px;
+      padding: 52px 44px;
+      text-align: center;
+    }
+    .contact-card .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem; font-weight: 500;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(26,26,46,0.2);
+      margin-bottom: 16px;
+    }
+    .contact-card h1 {
+      font-size: 1.8rem; font-weight: 600; letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .contact-card p {
+      color: rgba(26,26,46,0.35);
+      font-size: 0.9rem; line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .contact-card .email-box {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 28px;
+      background: #fff;
+      border: 1px solid rgba(26,26,46,0.06);
+      border-radius: 12px;
+      font-size: 1rem; font-weight: 500;
+      color: #1a1a2e; text-decoration: none;
+      transition: all .3s;
+      margin-bottom: 28px;
+    }
+    .contact-card .email-box:hover {
+      border-color: rgba(26,26,46,0.15);
+      box-shadow: 0 4px 20px rgba(26,26,46,0.04);
+    }
+    .contact-card .email-box .copy-icon {
+      font-size: 1.1rem;
+    }
+    .contact-card .btn-back {
+      display: inline-block;
+      padding: 12px 32px;
+      border-radius: 100px;
+      background: #1a1a2e; color: #fff;
+      font-size: 0.82rem; font-weight: 600; text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: all .3s;
+    }
+    .contact-card .btn-back:hover {
+      background: #2a2a4e; transform: translateY(-1px);
+    }
+    .contact-card .hint {
+      margin-top: 20px;
+      font-size: 0.75rem; color: rgba(26,26,46,0.15);
+    }
+
+    .rv {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+    }
+    .rv.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 640px) {
+      nav { padding: 18px 20px; }
+      nav .nav-links a:not(.lang-switch) { display: none; }
+      .contact-card { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+  <canvas id="web-canvas" data-color="26,26,46"></canvas>
+
+  <nav>
+    <div class="logo">Nexus<span> Research</span></div>
+    <div class="nav-links">
+      <a href="index.html">главная</a>
+      <div class="lang-switch">
+        <a href="contact.html" class="active">ru</a>
+        <a href="contact-en.html">en</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="contact-card rv">
+      <div class="tag">// Контакты</div>
+      <h1>Свяжитесь с нами</h1>
+      <p>
+        Если вы заинтересованы в сотрудничестве, партнёрстве или просто 
+        хотите обсудить идеи — напишите нам. Мы открыты к диалогу.
+      </p>
+      <a href="mailto:agiresearchcorp@gmail.com" class="email-box">
+        <span class="copy-icon">✉</span>
+        agiresearchcorp@gmail.com
+      </a>
+      <br>
+      <a href="mailto:agiresearchcorp@gmail.com" class="btn-back">Написать письмо</a>
+      <div class="hint">← <a href="index.html" style="color:rgba(26,26,46,0.2);text-decoration:none;">вернуться на главную</a></div>
+    </div>
+  </main>
+
+  <script src="web-animation.js"></script>
+  <script>
+    setTimeout(function() {
+      document.querySelector('.rv').classList.add('visible');
+    }, 100);
+  </script>
+</body>
+</html>
